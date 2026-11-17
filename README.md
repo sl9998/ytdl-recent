@@ -5,37 +5,41 @@ Dependencies: Python 3.9+ stdlib + yt-dlp on PATH (or via --ytdlp-path).
 
 ## Configuration
 
-- channels.txt : plain text file, one channel URL or handle per line
+- `channels.txt` : plain text file, one channel URL or handle per line
                  (e.g. https://www.youtube.com/@SomeChannel or @SomeChannel).
                  Blank lines and lines starting with '#' are ignored.
-- State        : JSON file storing seen video IDs (default: ./state/seen_ids.json).
+- `State`        : JSON file storing seen video IDs (default: `./state/seen_ids.json`).
                  Also stores the last successful run timestamp for info.
-- Output dir   : where yt-dlp saves files (default: ./downloads).
+- `Output dir`   : where yt-dlp saves files (default: `./downloads`).
 
 ## Behavior
 
-- For each channel, invokes yt-dlp with --dateafter to fetch only uploads
+- For each channel, invokes yt-dlp with `--dateafter` to fetch only uploads
   from the last 24h, then re-checks video IDs against the state file so a
   video is never downloaded twice even if it appears in multiple runs.
 - Skips channels with no recent uploads (logs at INFO).
 - Non-zero yt-dlp exit codes are logged as warnings but do not abort the run;
-  the script exits 0 if at least one channel was processed without a fatal
-  error, otherwise 1.
+  the script exits `0` if at least one channel was processed without a fatal
+  error, otherwise `1`.
 
 ## CLI
 
+```
   --config PATH      channels file (default: ./channels.txt)
   --state PATH       state JSON file (default: ./state/seen_ids.json)
   --output PATH      download directory (default: ./downloads)
   --ytdlp-path CMD   yt-dlp executable (default: "yt-dlp")
   --dry-run          list what would be downloaded, don't download
   --log-file PATH    also write logs to this file (in addition to stderr)
+```
 
 ## Examples
 
+```
   ./ytdl_recent.py                       # manual run, defaults
   ./ytdl_recent.py --dry-run             # preview
   ./ytdl_recent.py --config /etc/ytdl/channels.txt --output /media/yt
+```
 
 ## Scheduling
 
@@ -45,7 +49,9 @@ Dependencies: Python 3.9+ stdlib + yt-dlp on PATH (or via --ytdlp-path).
 
 ### systemd
 
-  # /etc/systemd/system/ytdl-recent.service
+* /etc/systemd/system/ytdl-recent.service
+
+```
   [Unit]
   Description=Download recent YouTube uploads
   After=network-online.target
@@ -58,8 +64,11 @@ Dependencies: Python 3.9+ stdlib + yt-dlp on PATH (or via --ytdlp-path).
       --state  /var/lib/ytdl/seen_ids.json \
       --output /media/youtube \
       --log-file /var/log/ytdl_recent.log
+```
 
-  # /etc/systemd/system/ytdl-recent.timer
+* /etc/systemd/system/ytdl-recent.timer
+
+```
   [Unit]
   Description=Daily run of ytdl-recent
 
@@ -73,6 +82,7 @@ Dependencies: Python 3.9+ stdlib + yt-dlp on PATH (or via --ytdlp-path).
   # enable:
   #   systemctl daemon-reload
   #   systemctl enable --now ytdl-recent.timer
+```
 
 ## Assumptions
 
