@@ -1,0 +1,32 @@
+# --- Runtime state (per-machine, must not be committed) ---
+state/
+*.tmp
+
+# --- Downloaded media ---
+downloads/
+*.mp4
+*.mkv
+*.webm
+*.m4a
+*.opus
+*.part
+*.ytdl
+
+# --- Logs ---
+*.log
+logs/
+
+# --- Python bytecode / tooling ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# --- Editor / OS cruft ---
+.vscode/
+.idea/
+.DS_Store
+
+# --- Local overrides ---
+channels.txt
+.env
