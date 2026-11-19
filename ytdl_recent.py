@@ -52,9 +52,21 @@ def read_channels(path: Path) -> list[str]:
         line = raw.strip()
         if not line or line.startswith("#"):
             continue
-        channels.append(line)
+        channels.append(normalize_channel(line))
     return channels
 
+def normalize_channel(entry: str) -> str:
+    """Turn '@handle' into a full YouTube channel URL; pass URLs through."""
+    if entry.startswith(("http://", "https://")):
+        return entry
+    if entry.startswith("@"):
+        return f"https://www.youtube.com/{entry}"
+    # Bare UC... channel ID (no scheme, no @)
+    if entry.startswith("UC") and "/" not in entry and " " not in entry:
+        return f"https://www.youtube.com/channel/{entry}"
+    # Anything else: hand it to yt-dlp unchanged and let it decide
+    # (it may be a search term or a domain-specific URL).
+    return entry
 
 def load_state(path: Path) -> dict:
     if not path.exists():
@@ -86,12 +98,13 @@ def list_channel_video_ids(ytdlp: str, channel: str) -> list[tuple[str, str]]:
 
     cmd = [
         ytdlp,
-        "--flat-playlist",
         "--print", "%(id)s\t%(title)s",
         "--dateafter", dateafter,
         "--no-warnings",
+        "--playlist-end", "50",   # safety cap so a huge channel doesn't hang
         channel,
     ]
+
     LOG.info("listing recent uploads for %s (since %s)", channel, dateafter)
     try:
         proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
